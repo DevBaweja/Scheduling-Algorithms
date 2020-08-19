@@ -1,0 +1,4 @@
+git clone https://github.com/DevBaweja/Scheduling-Algorithms.git
+git add -A
+git commit -m ""
+git push origin master
