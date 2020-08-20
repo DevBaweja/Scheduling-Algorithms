@@ -1,1 +1,3 @@
-node_modules/
+# Removing Execution Files
+*.exe
+*.o
