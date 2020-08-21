@@ -4,4 +4,3 @@ git commit -m ""
 git push origin master
 git pull origin master
 git config user.name "your username" 
-git config user.password "your password"
