@@ -2,5 +2,5 @@
 
 int main()
 {
-    readFile("Priority-PE.csv");
+    readFile("../../input/Priority-PE.csv");
 }

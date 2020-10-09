@@ -1,13 +1,10 @@
 #include <stdio.h>
-
-#include "../utils/read-file.h";
+#include "../utils/read-file.h"
 
 int main()
 {
-    readFile("FCFS-NPE.csv");
-    // Content Read
+    // Read File
+    readFile("../../input/FCFS-NPE.csv");
     // Parse
-    char **PID;
-    char **AT;
-    char **BT;
+    printf("%d", TOTAL);
 }
