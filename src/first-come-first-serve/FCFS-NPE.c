@@ -2,14 +2,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-char **PID;
-char **AT;
-char **BT;
+// Temp Inputs
+char **PIDtemp;
+char **ATtemp;
+char **BTtemp;
 int TOTAL;
+
+// Read File
 void readFile(char *filename)
 {
     FILE *fp, *fptotal;
-
     char *mode = "r";
     fp = fopen(filename, mode);
     fptotal = fopen(filename, mode);
@@ -19,7 +21,6 @@ void readFile(char *filename)
         printf("Cann't open file!");
         exit(-1);
     }
-
     // Read Content
     int SIZE = 1000;
     char line[SIZE];
@@ -29,9 +30,9 @@ void readFile(char *filename)
     while (strcmp(fgets(line, sizeof(line), (FILE *)fptotal), "EOF") != 0)
         TOTAL++;
 
-    PID = (char **)malloc(TOTAL + 1);
-    AT = (char **)malloc(TOTAL + 1);
-    BT = (char **)malloc(TOTAL + 1);
+    PIDtemp = (char **)malloc(TOTAL + 1);
+    ATtemp = (char **)malloc(TOTAL + 1);
+    BTtemp = (char **)malloc(TOTAL + 1);
 
     // Read content from file
     char content[SIZE];
@@ -40,34 +41,92 @@ void readFile(char *filename)
     {
         char *token;
         token = strtok(content, ":");
-        PID[pos] = (char *)malloc(strlen(token) + 1);
-        strcpy(PID[pos], token);
+        PIDtemp[pos] = (char *)malloc(strlen(token) + 1);
+        strcpy(PIDtemp[pos], token);
 
         char *args[2];
         // Spliting with delimiter of :
         int index;
         for (index = 0; (token = strtok(NULL, ":")) != NULL; index++)
+        {
+            // Allocate Memory
+            args[index] = (char *)malloc(strlen(token) + 1);
+            // Copying
             strcpy(args[index], token);
+        }
 
         // Memory Allocation
-        AT[pos] = (char *)malloc(strlen(args[0]) + 1);
+        ATtemp[pos] = (char *)malloc(strlen(args[0]) + 1);
         // Copying
-        strcpy(AT[pos], args[0]);
+        strcpy(ATtemp[pos], args[0]);
 
         // Memory Allocation
-        BT[pos] = (char *)malloc(strlen(args[1]) + 1);
+        BTtemp[pos] = (char *)malloc(strlen(args[1]) + 1);
         // Copying
-        strcpy(BT[pos], args[1]);
+        strcpy(BTtemp[pos], args[1]);
     }
     // Close file
     fclose(fptotal);
     fclose(fp);
 }
 
+// Structure
+typedef struct Process
+{
+    char *PID;
+    int AT, BT, CT, TAT, WT, RT;
+} Process;
+
+// Processes
+Process *processes;
+
+// Parse Inputs
+void parseInputs()
+{
+    // Allocate Memory
+    processes = (struct Process *)malloc(TOTAL * sizeof(struct Process));
+    int index;
+    for (index = 0; index < TOTAL; index++)
+    {
+        // Copying PID
+        processes[index].PID = PIDtemp[index];
+        // Type Cast ATtemp and BTtemp
+        processes[index].AT = atoi(ATtemp[index]);
+        processes[index].BT = atoi(BTtemp[index]);
+    }
+}
+// Ready Queue
+typedef struct readyQueue
+{
+    Process *p;
+    readyQueue *next;
+} readyQueue;
+
+readyQueue *queue;
+// Show Queue
+// Enqueue
+// Dequeue
+
+// First Come First Serve
+void fcfs_npe()
+{
+    // Allocate Memory
+    queue = (readyQueue *)malloc(sizeof(readyQueue));
+    int time = 0;
+    while (1)
+    {
+        time++;
+    }
+}
+
 int main()
 {
+    char *filename = "FCFS-NPE.csv";
     // Read File
-    readFile("../../input/FCFS-NPE.csv");
-    // Parse
-    printf("%d", TOTAL);
+    readFile(filename);
+    // Parse Inputs
+    parseInputs();
+
+    // Algorithm
+    fcfs_npe();
 }
