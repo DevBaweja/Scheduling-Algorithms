@@ -83,40 +83,101 @@ Process *processes;
 // Parse Inputs
 void parseInputs()
 {
+    processes = (Process *)malloc(TOTAL * sizeof(Process));
     // Allocate Memory
-    processes = (struct Process *)malloc(TOTAL * sizeof(struct Process));
     int index;
     for (index = 0; index < TOTAL; index++)
-    {
-        // Copying PID
-        processes[index].PID = PIDtemp[index];
-        // Type Cast ATtemp and BTtemp
-        processes[index].AT = atoi(ATtemp[index]);
-        processes[index].BT = atoi(BTtemp[index]);
-    }
+
+        for (index = 0; index < TOTAL; index++)
+        {
+            // Copying PID
+            processes[index].PID = PIDtemp[index];
+            // Type Cast ATtemp and BTtemp
+            processes[index].AT = atoi(ATtemp[index]);
+            processes[index].BT = atoi(BTtemp[index]);
+        }
 }
 // Ready Queue
 typedef struct readyQueue
 {
-    Process *p;
-    readyQueue *next;
+    Process p;
+    struct readyQueue *next;
 } readyQueue;
 
-readyQueue *queue;
+readyQueue *queue = NULL;
 // Show Queue
+void showQueue(readyQueue *queue)
+{
+    if (queue == NULL)
+    {
+        printf("No Element");
+    }
+    else
+    {
+        readyQueue *temp = queue;
+        while (temp->next != NULL)
+        {
+            printf("%d ", temp->p.AT);
+            temp = temp->next;
+        }
+        printf("%d ", temp->p.AT);
+    }
+}
 // Enqueue
+void enqueue(readyQueue *queue, Process p)
+{
+    if (queue == NULL)
+    {
+        queue = (readyQueue *)malloc(sizeof(readyQueue));
+        queue->p = p;
+        queue->next = NULL;
+    }
+    else
+    {
+        readyQueue *temp = queue;
+        while (temp->next != NULL)
+            temp = temp->next;
+
+        temp->next = (readyQueue *)malloc(sizeof(readyQueue));
+        temp = temp->next;
+        temp->p = p;
+        temp->next = NULL;
+    }
+}
 // Dequeue
+void dequeue(readyQueue *queue)
+{
+    if (queue == NULL)
+    {
+        printf("No Element");
+    }
+    else
+    {
+        readyQueue *temp = queue;
+        while (temp->next != NULL)
+            temp = temp->next;
+
+        if (temp == queue)
+            queue = NULL;
+
+        // temp->p = NULL;
+        // temp->next = NULL;
+    }
+}
 
 // First Come First Serve
 void fcfs_npe()
 {
-    // Allocate Memory
-    queue = (readyQueue *)malloc(sizeof(readyQueue));
+    // Init Queue
+    enqueue(queue, processes[0]);
+    enqueue(queue, processes[1]);
+    enqueue(queue, processes[2]);
+    enqueue(queue, processes[3]);
+
+    showQueue(queue);
+
+    dequeue(queue);
     int time = 0;
-    while (1)
-    {
-        time++;
-    }
 }
 
 int main()
