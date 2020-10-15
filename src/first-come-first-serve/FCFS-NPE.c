@@ -172,16 +172,6 @@ void fcfs_npe()
 {
     // Init Queue
     readyQueue = createQueue();
-    enqueue(readyQueue, processes[0]);
-    enqueue(readyQueue, processes[1]);
-    dequeue(readyQueue);
-    enqueue(readyQueue, processes[2]);
-    dequeue(readyQueue);
-    enqueue(readyQueue, processes[3]);
-
-    printf("%d ", readyQueue->front->p.AT);
-    printf("%d ", readyQueue->rear->p.AT);
-    int time = 0;
 }
 
 int main()
