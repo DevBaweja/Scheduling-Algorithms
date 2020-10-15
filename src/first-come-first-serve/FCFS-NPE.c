@@ -163,6 +163,8 @@ void dequeue(Queue *readyQueue)
     // If front becomes NULL, then change rear also as NULL
     if (readyQueue->front == NULL)
         readyQueue->rear = NULL;
+
+    free(node);
 }
 
 // First Come First Serve
