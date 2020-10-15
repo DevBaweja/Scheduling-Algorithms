@@ -113,12 +113,15 @@ typedef struct Queue
 
 Queue *readyQueue = NULL;
 
+// A utility function to create an empty queue
 Queue *createQueue()
 {
     Queue *readyQueue = (Queue *)malloc(sizeof(Queue));
     readyQueue->front = readyQueue->rear = NULL;
     return readyQueue;
 }
+
+// A utility function to create a new linked list node
 Node *newNode(Process p)
 {
     Node *node = (Node *)malloc(sizeof(Node));
