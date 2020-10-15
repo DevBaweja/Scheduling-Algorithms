@@ -97,86 +97,85 @@ void parseInputs()
             processes[index].BT = atoi(BTtemp[index]);
         }
 }
-// Ready Queue
-typedef struct readyQueue
+
+// Node
+typedef struct Node
 {
     Process p;
-    struct readyQueue *next;
-} readyQueue;
+    struct Node *next;
+} Node;
 
-readyQueue *queue = NULL;
-// Show Queue
-void showQueue(readyQueue *queue)
+// Queue
+typedef struct Queue
 {
-    if (queue == NULL)
-    {
-        printf("No Element");
-    }
-    else
-    {
-        readyQueue *temp = queue;
-        while (temp->next != NULL)
-        {
-            printf("%d ", temp->p.AT);
-            temp = temp->next;
-        }
-        printf("%d ", temp->p.AT);
-    }
+    Node *front, *rear;
+} Queue;
+
+Queue *readyQueue = NULL;
+
+Queue *createQueue()
+{
+    Queue *readyQueue = (Queue *)malloc(sizeof(Queue));
+    readyQueue->front = readyQueue->rear = NULL;
+    return readyQueue;
 }
+Node *newNode(Process p)
+{
+    Node *node = (Node *)malloc(sizeof(Node));
+    node->p = p;
+    node->next = NULL;
+    return node;
+}
+
 // Enqueue
-void enqueue(readyQueue *queue, Process p)
+void enqueue(Queue *readyQueue, Process p)
 {
-    if (queue == NULL)
-    {
-        queue = (readyQueue *)malloc(sizeof(readyQueue));
-        queue->p = p;
-        queue->next = NULL;
-    }
-    else
-    {
-        readyQueue *temp = queue;
-        while (temp->next != NULL)
-            temp = temp->next;
+    // Create a new node
+    Node *node = newNode(p);
 
-        temp->next = (readyQueue *)malloc(sizeof(readyQueue));
-        temp = temp->next;
-        temp->p = p;
-        temp->next = NULL;
+    // If queue is empty, then new node is front and rear both
+    if (readyQueue->rear == NULL)
+    {
+        readyQueue->front = readyQueue->rear = node;
+        return;
     }
+
+    // Add the new node at the end of queue and change rear
+    readyQueue->rear->next = node;
+    readyQueue->rear = node;
 }
+
 // Dequeue
-void dequeue(readyQueue *queue)
+void dequeue(Queue *readyQueue)
 {
-    if (queue == NULL)
-    {
-        printf("No Element");
-    }
-    else
-    {
-        readyQueue *temp = queue;
-        while (temp->next != NULL)
-            temp = temp->next;
+    // If queue is empty, return NULL.
+    if (readyQueue->front == NULL)
+        return;
 
-        if (temp == queue)
-            queue = NULL;
+    // Store previous front and move front one node ahead
+    Node *node = readyQueue->front;
 
-        // temp->p = NULL;
-        // temp->next = NULL;
-    }
+    readyQueue->front = readyQueue->front->next;
+
+    // If front becomes NULL, then change rear also as NULL
+    if (readyQueue->front == NULL)
+        readyQueue->rear = NULL;
 }
 
 // First Come First Serve
 void fcfs_npe()
 {
     // Init Queue
-    enqueue(queue, processes[0]);
-    enqueue(queue, processes[1]);
-    enqueue(queue, processes[2]);
-    enqueue(queue, processes[3]);
+    readyQueue = createQueue();
+    enqueue(readyQueue, processes[0]);
+    enqueue(readyQueue, processes[1]);
+    dequeue(readyQueue);
+    enqueue(readyQueue, processes[2]);
+    dequeue(readyQueue);
+    enqueue(readyQueue, processes[3]);
 
-    showQueue(queue);
-
-    dequeue(queue);
+    printf("%d ", readyQueue->front->p.AT);
+    printf("%d ", readyQueue->rear->p.AT);
     int time = 0;
 }
 
