@@ -44,7 +44,8 @@ P : AT : BT : CT : TAT : WT : RT
 
 
 Formulae - 
-
+Gnatt
+CT and ST are calculated by chart
 TAT = CT - AT
 WT = TAT - BT
 RT = ST - AT

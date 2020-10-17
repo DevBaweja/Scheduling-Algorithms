@@ -74,29 +74,11 @@ void readFile(char *filename)
 typedef struct Process
 {
     char *PID;
-    int AT, BT, CT, TAT, WT, RT;
+    int AT, BT, ST, CT, TAT, WT, RT;
+    int AT_new;
+    int BT_left, BT_temp;
+    int priority;
 } Process;
-
-// Processes
-Process *processes;
-
-// Parse Inputs
-void parseInputs()
-{
-    processes = (Process *)malloc(TOTAL * sizeof(Process));
-    // Allocate Memory
-    int index;
-    for (index = 0; index < TOTAL; index++)
-
-        for (index = 0; index < TOTAL; index++)
-        {
-            // Copying PID
-            processes[index].PID = PIDtemp[index];
-            // Type Cast ATtemp and BTtemp
-            processes[index].AT = atoi(ATtemp[index]);
-            processes[index].BT = atoi(BTtemp[index]);
-        }
-}
 
 // Node
 typedef struct Node
@@ -167,6 +149,66 @@ void dequeue(Queue *readyQueue)
     free(node);
 }
 
+// Processes
+Process *processes;
+
+// Parse Inputs
+void parseInputs()
+{
+    processes = (Process *)malloc(TOTAL * sizeof(Process));
+    // Allocate Memory
+    int index;
+    for (index = 0; index < TOTAL; index++)
+
+        for (index = 0; index < TOTAL; index++)
+        {
+            // Copying PID
+            processes[index].PID = PIDtemp[index];
+            // Type Cast ATtemp and BTtemp
+            processes[index].AT = atoi(ATtemp[index]);
+            processes[index].BT = atoi(BTtemp[index]);
+            processes[index].ST = 0;
+            processes[index].CT = 0;
+            processes[index].TAT = 0;
+            processes[index].WT = 0;
+            processes[index].RT = 0;
+            processes[index].AT_new = processes[index].AT;
+            processes[index].BT_left = processes[index].BT;
+            processes[index].BT_temp = 0;
+            processes[index].priority = 0;
+        }
+}
+// Set TAT
+void set_TAT(Process *p)
+{
+    p->TAT = p->CT - p->AT;
+}
+// Set WT
+void set_WT(Process *p)
+{
+    p->WT = p->TAT - p->BT;
+}
+
+// Set CT
+void set_CT(Process *p, int CT)
+{
+    p->CT = CT;
+    set_TAT(p);
+    set_WT(p);
+}
+
+// Set RT
+void set_RT(Process *p)
+{
+    p->RT = p->ST - p->AT;
+}
+// Set ST
+void set_ST(Process *p, int ST)
+{
+    p->ST = ST;
+    set_RT(p);
+}
+
 // First Come First Serve
 void fcfs_npe()
 {
@@ -181,6 +223,23 @@ int main()
     readFile(filename);
     // Parse Inputs
     parseInputs();
+
+    set_ST(&processes[1], 5);
+    set_CT(&processes[1], 7);
+
+    printf("AT: %d ", processes[1].AT);
+    printf("BT: %d ", processes[1].BT);
+    printf("ST: %d ", processes[1].ST);
+    printf("CT: %d ", processes[1].CT);
+    printf("TAT: %d ", processes[1].TAT);
+    printf("WT: %d ", processes[1].WT);
+    printf("RT: %d ", processes[1].RT);
+
+    printf("AT New: %d ", processes[1].AT_new);
+    printf("BT Temp: %d ", processes[1].BT_temp);
+    printf("BT Left: %d ", processes[1].BT_left);
+
+    printf("Priority: %d ", processes[1].priority);
 
     // Algorithm
     fcfs_npe();
