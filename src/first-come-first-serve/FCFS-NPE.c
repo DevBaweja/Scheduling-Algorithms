@@ -221,6 +221,7 @@ int max()
     }
     return maxAT;
 }
+float avgTAT = 0, avgWT = 0, avgRT = 0;
 
 // First Come First Serve
 void fcfs_npe()
@@ -252,9 +253,7 @@ void fcfs_npe()
             timeline++;
         }
         if (p.BT_temp > 0)
-        {
             p.CT = timeline;
-        }
         int correct = getCorrect(p);
         set_ST(&processes[correct], timeline);
         while (p.BT_left > 0)
@@ -266,6 +265,17 @@ void fcfs_npe()
         set_CT(&processes[correct], timeline);
         p.BT_temp = 0;
     }
+
+    // Avg
+    for (index = 0; index < TOTAL; index++)
+    {
+        avgTAT += processes[index].TAT;
+        avgWT += processes[index].WT;
+        avgRT += processes[index].RT;
+    }
+    avgTAT = avgTAT / TOTAL;
+    avgWT = avgWT / TOTAL;
+    avgRT = avgRT / TOTAL;
 }
 
 int getCorrect(Process p)
@@ -311,4 +321,8 @@ int main()
         */
         printf("\n");
     }
+    printf("Average : \n");
+    printf("Turn Around Time: %.2f ", avgTAT);
+    printf("Waiting Time: %.2f ", avgWT);
+    printf("Response Time: %.2f ", avgRT);
 }
