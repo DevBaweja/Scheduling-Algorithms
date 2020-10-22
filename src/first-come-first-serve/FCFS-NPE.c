@@ -131,7 +131,7 @@ void enqueue(Queue *readyQueue, Process p)
 }
 
 // Dequeue
-void dequeue(Queue *readyQueue)
+Process dequeue(Queue *readyQueue)
 {
     // If queue is empty, return NULL.
     if (readyQueue->front == NULL)
@@ -146,7 +146,7 @@ void dequeue(Queue *readyQueue)
     if (readyQueue->front == NULL)
         readyQueue->rear = NULL;
 
-    free(node);
+    return node->p;
 }
 
 // Processes
@@ -209,11 +209,73 @@ void set_ST(Process *p, int ST)
     set_RT(p);
 }
 
+int max()
+{
+    int maxAT = 0;
+    int index;
+    for (index = 0; index < TOTAL; index++)
+    {
+        int AT = processes[index].AT;
+        if (maxAT < AT)
+            maxAT = AT;
+    }
+    return maxAT;
+}
+
 // First Come First Serve
 void fcfs_npe()
 {
     // Init Queue
     readyQueue = createQueue();
+    // Enqueue Processes according to AT
+    int timeline;
+    timeline = 0;
+    int maxAT = max();
+    while (timeline <= maxAT)
+    {
+        int index;
+        for (index = 0; index < TOTAL; index++)
+            if (timeline == processes[index].AT)
+                enqueue(readyQueue, processes[index]);
+        timeline++;
+    }
+
+    // Dequeue Process
+    timeline = 0;
+    int index;
+    for (index = 0; index < TOTAL; index++)
+    {
+        Process p = dequeue(readyQueue);
+        while (timeline < p.AT)
+        {
+            p.BT_temp++;
+            timeline++;
+        }
+        if (p.BT_temp > 0)
+        {
+            p.CT = timeline;
+        }
+        int correct = getCorrect(p);
+        set_ST(&processes[correct], timeline);
+        while (p.BT_left > 0)
+        {
+            p.BT_temp++;
+            p.BT_left--;
+            timeline++;
+        }
+        set_CT(&processes[correct], timeline);
+        p.BT_temp = 0;
+    }
+}
+
+int getCorrect(Process p)
+{
+    int index;
+    for (index = 0; index < TOTAL; index++)
+    {
+        if (p.PID == processes[index].PID)
+            return index;
+    }
 }
 
 int main()
@@ -224,23 +286,29 @@ int main()
     // Parse Inputs
     parseInputs();
 
-    set_ST(&processes[1], 5);
-    set_CT(&processes[1], 7);
-
-    printf("AT: %d ", processes[1].AT);
-    printf("BT: %d ", processes[1].BT);
-    printf("ST: %d ", processes[1].ST);
-    printf("CT: %d ", processes[1].CT);
-    printf("TAT: %d ", processes[1].TAT);
-    printf("WT: %d ", processes[1].WT);
-    printf("RT: %d ", processes[1].RT);
-
-    printf("AT New: %d ", processes[1].AT_new);
-    printf("BT Temp: %d ", processes[1].BT_temp);
-    printf("BT Left: %d ", processes[1].BT_left);
-
-    printf("Priority: %d ", processes[1].priority);
-
     // Algorithm
     fcfs_npe();
+
+    // set_ST(&processes[1], 5);
+    // set_CT(&processes[1], 7);
+
+    int index;
+    for (index = 0; index < TOTAL; index++)
+    {
+        printf("Process: %s ", processes[index].PID);
+        printf("AT: %d ", processes[index].AT);
+        printf("BT: %d ", processes[index].BT);
+        printf("ST: %d ", processes[index].ST);
+        printf("CT: %d ", processes[index].CT);
+        printf("TAT: %d ", processes[index].TAT);
+        printf("WT: %d ", processes[index].WT);
+        printf("RT: %d ", processes[index].RT);
+        /*
+        printf("Priority: %d ", processes[index].priority);
+        printf("AT New: %d ", processes[index].AT_new);
+        printf("BT Temp: %d ", processes[index].BT_temp);
+        printf("BT Left: %d ", processes[index].BT_left);
+        */
+        printf("\n");
+    }
 }
