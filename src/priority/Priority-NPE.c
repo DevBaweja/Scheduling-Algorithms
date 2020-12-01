@@ -82,9 +82,8 @@ typedef struct Process
 {
     char *PID;
     int AT, BT, ST, CT, TAT, WT, RT;
-    int AT_new;
     int BT_left;
-    int priority;
+    int priority, priority_temp;
 } Process;
 
 // Node
@@ -178,9 +177,9 @@ void parseInputs()
         processes[index].TAT = 0;
         processes[index].WT = 0;
         processes[index].RT = 0;
-        processes[index].AT_new = processes[index].AT;
         processes[index].BT_left = processes[index].BT;
         processes[index].priority = atoi(Ptemp[index]);
+        processes[index].priority_temp = atoi(Ptemp[index]);
     }
 }
 
@@ -227,6 +226,27 @@ int maximum()
     }
     return maxAT;
 }
+
+int maximumPriority(int limit)
+{
+    int maxPriority = 0;
+    int maxIndex = 0;
+    int index;
+    for (index = 0; index < TOTAL; index++)
+    {
+        if (processes[index].AT == limit)
+        {
+            int priority = processes[index].priority_temp;
+            if ((maxPriority == 0 || priority > maxPriority) && priority != 0)
+            {
+                maxPriority = priority;
+                maxIndex = index;
+            }
+        }
+    }
+    return maxIndex;
+}
+
 float avgTAT = 0, avgWT = 0, avgRT = 0;
 
 // Priority
@@ -243,8 +263,16 @@ void priority_npe()
     {
         int index;
         for (index = 0; index < TOTAL; index++)
+        {
             if (timeline == processes[index].AT)
-                enqueue(readyQueue, processes[index]);
+            {
+                // Getting Process with maximum Priority
+                int processIndex = maximumPriority(timeline);
+                processes[processIndex].priority_temp = 0;
+                printf("%d ", processIndex);
+                enqueue(readyQueue, processes[processIndex]);
+            }
+        }
         timeline++;
     }
 
