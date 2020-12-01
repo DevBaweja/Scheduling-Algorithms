@@ -76,7 +76,7 @@ typedef struct Process
     char *PID;
     int AT, BT, ST, CT, TAT, WT, RT;
     int AT_new;
-    int BT_left;
+    int BT_left, BT_temp;
     int priority;
 } Process;
 
@@ -173,6 +173,7 @@ void parseInputs()
         processes[index].RT = 0;
         processes[index].AT_new = processes[index].AT;
         processes[index].BT_left = processes[index].BT;
+        processes[index].BT_temp = processes[index].BT;
         processes[index].priority = 0;
     }
 }
@@ -225,19 +226,22 @@ int minimum(int limit)
 {
     int minBT = 0;
     int minIndex = 0;
-    int index = 0;
-    while (processes[index].AT <= limit)
+    int index;
+    for (index = 0; index < TOTAL; index++)
     {
-        int BT_left = processes[index].BT_left;
-        if (minBT == 0 || BT_left < minBT)
+        if (processes[index].AT == limit)
         {
-            minBT = BT_left;
-            minIndex = index;
+            int BT = processes[index].BT_temp;
+            if ((minBT == 0 || BT < minBT) && BT != 0)
+            {
+                minBT = BT;
+                minIndex = index;
+            }
         }
-        index++;
     }
     return minIndex;
 }
+
 float avgTAT = 0, avgWT = 0, avgRT = 0;
 
 // Shortest Job First
@@ -253,8 +257,15 @@ void sjf_npe()
     {
         int index;
         for (index = 0; index < TOTAL; index++)
+        {
             if (timeline == processes[index].AT)
-                enqueue(readyQueue, processes[index]);
+            {
+                // Getting Process with minimum Burst Time
+                int processIndex = minimum(timeline);
+                processes[processIndex].BT_temp = 0;
+                enqueue(readyQueue, processes[processIndex]);
+            }
+        }
         timeline++;
     }
 
@@ -268,9 +279,7 @@ void sjf_npe()
         while (timeline < p.AT)
             timeline++;
 
-        // Pop Index
-        int processIndex = minimum(timeline);
-        printf("%d ", processIndex);
+        int processIndex = getProcessIndex(p);
         // Setting Start Time
         set_ST(&processes[processIndex], timeline);
         while (p.BT_left > 0)
@@ -325,10 +334,10 @@ int main()
         printf("TAT: %d ", processes[index].TAT);
         printf("WT: %d ", processes[index].WT);
         printf("RT: %d ", processes[index].RT);
+        printf("BT Temp: %d ", processes[index].BT_temp);
         /*
         printf("Priority: %d ", processes[index].priority);
         printf("AT New: %d ", processes[index].AT_new);
-        printf("BT Left: %d ", processes[index].BT_left);
         */
         printf("\n");
     }
