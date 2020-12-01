@@ -75,9 +75,7 @@ typedef struct Process
 {
     char *PID;
     int AT, BT, ST, CT, TAT, WT, RT;
-    int AT_new;
     int BT_left;
-    int priority;
 } Process;
 
 // Node
@@ -171,9 +169,7 @@ void parseInputs()
         processes[index].TAT = 0;
         processes[index].WT = 0;
         processes[index].RT = 0;
-        processes[index].AT_new = processes[index].AT;
         processes[index].BT_left = processes[index].BT;
-        processes[index].priority = 0;
     }
 }
 
@@ -306,11 +302,6 @@ int main()
         printf("TAT: %d ", processes[index].TAT);
         printf("WT: %d ", processes[index].WT);
         printf("RT: %d ", processes[index].RT);
-        /*
-        printf("Priority: %d ", processes[index].priority);
-        printf("AT New: %d ", processes[index].AT_new);
-        printf("BT Left: %d ", processes[index].BT_left);
-        */
         printf("\n");
     }
     printf("Average : \n");
