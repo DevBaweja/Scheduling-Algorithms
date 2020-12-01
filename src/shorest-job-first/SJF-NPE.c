@@ -76,7 +76,7 @@ typedef struct Process
     char *PID;
     int AT, BT, ST, CT, TAT, WT, RT;
     int AT_new;
-    int BT_left, BT_temp;
+    int BT_left;
     int priority;
 } Process;
 
@@ -173,7 +173,6 @@ void parseInputs()
         processes[index].RT = 0;
         processes[index].AT_new = processes[index].AT;
         processes[index].BT_left = processes[index].BT;
-        processes[index].BT_temp = 0;
         processes[index].priority = 0;
     }
 }
@@ -265,13 +264,10 @@ void sjf_npe()
     for (index = 0; index < TOTAL; index++)
     {
         Process p = dequeue(readyQueue);
+        // Waiting for process to arrive
         while (timeline < p.AT)
-        {
-            p.BT_temp++;
             timeline++;
-        }
-        if (p.BT_temp > 0)
-            p.CT = timeline;
+
         // Pop Index
         int processIndex = minimum(timeline);
         printf("%d ", processIndex);
@@ -279,12 +275,10 @@ void sjf_npe()
         set_ST(&processes[processIndex], timeline);
         while (p.BT_left > 0)
         {
-            p.BT_temp++;
             p.BT_left--;
             timeline++;
         }
         set_CT(&processes[processIndex], timeline);
-        p.BT_temp = 0;
     }
 
     // Avg
@@ -334,7 +328,6 @@ int main()
         /*
         printf("Priority: %d ", processes[index].priority);
         printf("AT New: %d ", processes[index].AT_new);
-        printf("BT Temp: %d ", processes[index].BT_temp);
         printf("BT Left: %d ", processes[index].BT_left);
         */
         printf("\n");

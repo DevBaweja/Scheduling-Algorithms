@@ -231,6 +231,7 @@ void fcfs_npe()
     int timeline;
     timeline = 0;
     int maxAT = maximum();
+    // Adding process according to Arrival Time
     while (timeline <= maxAT)
     {
         int index;
@@ -246,6 +247,7 @@ void fcfs_npe()
     for (index = 0; index < TOTAL; index++)
     {
         Process p = dequeue(readyQueue);
+        // Waiting for process to arrive
         while (timeline < p.AT)
             timeline++;
         // Getting index of process
