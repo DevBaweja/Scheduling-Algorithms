@@ -76,7 +76,7 @@ typedef struct Process
     char *PID;
     int AT, BT, ST, CT, TAT, WT, RT;
     int AT_new;
-    int BT_left, BT_temp;
+    int BT_left;
     int priority;
 } Process;
 
@@ -158,26 +158,25 @@ void parseInputs()
     processes = (Process *)malloc(TOTAL * sizeof(Process));
     // Allocate Memory
     int index;
-    for (index = 0; index < TOTAL; index++)
 
-        for (index = 0; index < TOTAL; index++)
-        {
-            // Copying PID
-            processes[index].PID = PIDtemp[index];
-            // Type Cast ATtemp and BTtemp
-            processes[index].AT = atoi(ATtemp[index]);
-            processes[index].BT = atoi(BTtemp[index]);
-            processes[index].ST = 0;
-            processes[index].CT = 0;
-            processes[index].TAT = 0;
-            processes[index].WT = 0;
-            processes[index].RT = 0;
-            processes[index].AT_new = processes[index].AT;
-            processes[index].BT_left = processes[index].BT;
-            processes[index].BT_temp = 0;
-            processes[index].priority = 0;
-        }
+    for (index = 0; index < TOTAL; index++)
+    {
+        // Copying PID
+        processes[index].PID = PIDtemp[index];
+        // Type Cast ATtemp and BTtemp
+        processes[index].AT = atoi(ATtemp[index]);
+        processes[index].BT = atoi(BTtemp[index]);
+        processes[index].ST = 0;
+        processes[index].CT = 0;
+        processes[index].TAT = 0;
+        processes[index].WT = 0;
+        processes[index].RT = 0;
+        processes[index].AT_new = processes[index].AT;
+        processes[index].BT_left = processes[index].BT;
+        processes[index].priority = 0;
+    }
 }
+
 // Set TAT
 void set_TAT(Process *p)
 {
@@ -209,7 +208,7 @@ void set_ST(Process *p, int ST)
     set_RT(p);
 }
 
-int max()
+int maximum()
 {
     int maxAT = 0;
     int index;
@@ -231,7 +230,7 @@ void fcfs_npe()
     // Enqueue Processes according to AT
     int timeline;
     timeline = 0;
-    int maxAT = max();
+    int maxAT = maximum();
     while (timeline <= maxAT)
     {
         int index;
@@ -248,22 +247,17 @@ void fcfs_npe()
     {
         Process p = dequeue(readyQueue);
         while (timeline < p.AT)
-        {
-            p.BT_temp++;
             timeline++;
-        }
-        if (p.BT_temp > 0)
-            p.CT = timeline;
-        int correct = getCorrect(p);
-        set_ST(&processes[correct], timeline);
+        // Getting index of process
+        int processIndex = getProcessIndex(p);
+        // Setting Start Time
+        set_ST(&processes[processIndex], timeline);
         while (p.BT_left > 0)
         {
-            p.BT_temp++;
             p.BT_left--;
             timeline++;
         }
-        set_CT(&processes[correct], timeline);
-        p.BT_temp = 0;
+        set_CT(&processes[processIndex], timeline);
     }
 
     // Avg
@@ -278,7 +272,7 @@ void fcfs_npe()
     avgRT = avgRT / TOTAL;
 }
 
-int getCorrect(Process p)
+int getProcessIndex(Process p)
 {
     int index;
     for (index = 0; index < TOTAL; index++)
@@ -299,9 +293,6 @@ int main()
     // Algorithm
     fcfs_npe();
 
-    // set_ST(&processes[1], 5);
-    // set_CT(&processes[1], 7);
-
     int index;
     for (index = 0; index < TOTAL; index++)
     {
@@ -316,7 +307,6 @@ int main()
         /*
         printf("Priority: %d ", processes[index].priority);
         printf("AT New: %d ", processes[index].AT_new);
-        printf("BT Temp: %d ", processes[index].BT_temp);
         printf("BT Left: %d ", processes[index].BT_left);
         */
         printf("\n");
