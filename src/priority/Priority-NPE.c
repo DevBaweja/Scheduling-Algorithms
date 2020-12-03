@@ -179,7 +179,7 @@ void parseInputs()
         processes[index].RT = 0;
         processes[index].BT_left = processes[index].BT;
         processes[index].priority = atoi(Ptemp[index]);
-        processes[index].priority_temp = atoi(Ptemp[index]);
+        processes[index].priority_temp = processes[index].priority;
     }
 }
 
@@ -269,7 +269,6 @@ void priority_npe()
                 // Getting Process with maximum Priority
                 int processIndex = maximumPriority(timeline);
                 processes[processIndex].priority_temp = 0;
-                printf("%d ", processIndex);
                 enqueue(readyQueue, processes[processIndex]);
             }
         }

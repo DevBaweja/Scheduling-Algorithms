@@ -6,6 +6,7 @@
 char **PIDtemp;
 char **ATtemp;
 char **BTtemp;
+char **Ptemp;
 int TOTAL;
 
 // Read File
@@ -33,6 +34,7 @@ void readFile(char *filename)
     PIDtemp = (char **)malloc(TOTAL + 1);
     ATtemp = (char **)malloc(TOTAL + 1);
     BTtemp = (char **)malloc(TOTAL + 1);
+    Ptemp = (char **)malloc(TOTAL + 1);
 
     // Read content from file
     char content[SIZE];
@@ -44,7 +46,7 @@ void readFile(char *filename)
         PIDtemp[pos] = (char *)malloc(strlen(token) + 1);
         strcpy(PIDtemp[pos], token);
 
-        char *args[2];
+        char *args[3];
         // Spliting with delimiter of :
         int index;
         for (index = 0; (token = strtok(NULL, ":")) != NULL; index++)
@@ -64,6 +66,11 @@ void readFile(char *filename)
         BTtemp[pos] = (char *)malloc(strlen(args[1]) + 1);
         // Copying
         strcpy(BTtemp[pos], args[1]);
+
+        // Memory Allocation
+        Ptemp[pos] = (char *)malloc(strlen(args[2]) + 1);
+        // Copying
+        strcpy(Ptemp[pos], args[2]);
     }
     // Close file
     fclose(fptotal);
@@ -75,7 +82,9 @@ typedef struct Process
 {
     char *PID;
     int AT, BT, ST, CT, TAT, WT, RT;
+    int AT_new;
     int BT_left;
+    int priority, priority_temp;
 } Process;
 
 // Node
@@ -169,7 +178,10 @@ void parseInputs()
         processes[index].TAT = 0;
         processes[index].WT = 0;
         processes[index].RT = 0;
+        processes[index].AT_new = processes[index].AT;
         processes[index].BT_left = processes[index].BT;
+        processes[index].priority = atoi(Ptemp[index]);
+        processes[index].priority_temp = processes[index].priority;
     }
 }
 
@@ -216,10 +228,31 @@ int maximum()
     }
     return maxAT;
 }
+
+int maximumPriority(int limit)
+{
+    int maxPriority = 0;
+    int maxIndex = 0;
+    int index;
+    for (index = 0; index < TOTAL; index++)
+    {
+        if (processes[index].AT_new == limit)
+        {
+            int priority = processes[index].priority_temp;
+            if ((maxPriority == 0 || priority > maxPriority) && priority != 0)
+            {
+                maxPriority = priority;
+                maxIndex = index;
+            }
+        }
+    }
+    return maxIndex;
+}
+
 float avgTAT = 0, avgWT = 0, avgRT = 0;
 
-// Round Robin
-void rr_pe()
+// Priority
+void priority_npe()
 {
     // Init Queue
     readyQueue = createQueue();
@@ -232,54 +265,57 @@ void rr_pe()
     {
         int index;
         for (index = 0; index < TOTAL; index++)
+        {
             if (timeline == processes[index].AT)
-                enqueue(readyQueue, processes[index]);
+            {
+                // Getting Process with maximum Priority
+                int processIndex = maximumPriority(timeline);
+                processes[processIndex].priority_temp = 0;
+                // enqueue(readyQueue, processes[processIndex]);
+            }
+        }
         timeline++;
     }
 
     // Dequeue Process
     timeline = 0;
-    int quantam = 2;
-    while (1)
+    int index;
+    printf("Init");
+    while (readyQueue->front != NULL)
     {
         Process p = dequeue(readyQueue);
-        // Waiting for process to arrive
-        while (timeline < p.AT)
+        while (timeline < p.AT_new)
             timeline++;
-        // Getting index of process
-        int processIndex = getProcessIndex(p);
-        // Setting Start Time
-        if (processes[processIndex].ST == 0)
-            set_ST(&processes[processIndex], timeline);
-        if (processes[processIndex].BT_left > quantam)
-        {
-            // Increase timeline by quantam
-            timeline = timeline + quantam;
-            processes[processIndex].BT_left -= quantam;
-            enqueue(readyQueue, processes[processIndex]);
-        }
-        else
-        {
-            // Increase timeline by remaining Burst Time
-            timeline = timeline + processes[processIndex].BT_left;
-            processes[processIndex].BT_left = 0;
-            set_CT(&processes[processIndex], timeline);
-        }
-        if (readyQueue->front == NULL)
-            break;
+        printf("%s ", p.PID);
     }
+    // for (index = 0; index < TOTAL; index++)
+    // {
+    //     Process p = dequeue(readyQueue);
+    //     // Waiting for process to arrive
+    //     while (timeline < p.AT)
+    //         timeline++;
+    //     // Getting index of process
+    //     int processIndex = getProcessIndex(p);
+    //     // Setting Start Time
+    //     set_ST(&processes[processIndex], timeline);
+    //     while (p.BT_left > 0)
+    //     {
+    //         p.BT_left--;
+    //         timeline++;
+    //     }
+    //     set_CT(&processes[processIndex], timeline);
+    // }
 
     // Avg
-    int index;
-    for (index = 0; index < TOTAL; index++)
-    {
-        avgTAT += processes[index].TAT;
-        avgWT += processes[index].WT;
-        avgRT += processes[index].RT;
-    }
-    avgTAT = avgTAT / TOTAL;
-    avgWT = avgWT / TOTAL;
-    avgRT = avgRT / TOTAL;
+    // for (index = 0; index < TOTAL; index++)
+    // {
+    //     avgTAT += processes[index].TAT;
+    //     avgWT += processes[index].WT;
+    //     avgRT += processes[index].RT;
+    // }
+    // avgTAT = avgTAT / TOTAL;
+    // avgWT = avgWT / TOTAL;
+    // avgRT = avgRT / TOTAL;
 }
 
 int getProcessIndex(Process p)
@@ -294,14 +330,14 @@ int getProcessIndex(Process p)
 
 int main()
 {
-    char *filename = "RR-PE.csv";
+    char *filename = "Priority-PE.csv";
     // Read File
     readFile(filename);
     // Parse Inputs
     parseInputs();
 
     // Algorithm
-    rr_pe();
+    priority_npe();
 
     int index;
     for (index = 0; index < TOTAL; index++)
@@ -314,6 +350,7 @@ int main()
         printf("TAT: %d ", processes[index].TAT);
         printf("WT: %d ", processes[index].WT);
         printf("RT: %d ", processes[index].RT);
+        printf("Priority: %d ", processes[index].priority);
         printf("\n");
     }
     printf("Average : \n");
