@@ -25,14 +25,11 @@ void readFile(char *filename)
     // Read content from file
     char content[SIZE];
     int pos;
-    printf("Inputs \n");
-    printf("    PID  AT  BT  Priority \n");
     for (pos = 0; pos < TOTAL; pos++)
     {
         fgets(content, sizeof(content), (FILE *)fp);
         char *token;
         token = strtok(content, ":");
-        printf("    %s", token);
         strcpy(PIDtemp[pos], token);
 
         char *args[3];
@@ -41,7 +38,6 @@ void readFile(char *filename)
         for (index = 0; index < 3; index++)
         {
             token = strtok(NULL, ":");
-            printf("    %s", token);
             // Allocate Memory
             args[index] = (char *)malloc(strlen(token) + 1);
             // Copying
@@ -57,6 +53,15 @@ void readFile(char *filename)
         // Copying
         strcpy(Ptemp[pos], args[2]);
     }
+
+    // Printing inputs
+    printf("Inputs \n");
+    printf("%-5s %-5s %-5s %-5s\n", "PID", "AT", "BT", "Priority");
+    for (pos = 0; pos < TOTAL; pos++)
+    {
+        printf("%-5s %-5s %-5s %-5s\n", PIDtemp[pos], ATtemp[pos], BTtemp[pos], Ptemp[pos]);
+    }
+
     printf("\n\n");
     // Close file
     fclose(fp);
@@ -284,19 +289,25 @@ void printTable()
 {
     int index;
     // Table
+    printf("%-5s %-5s %-5s %-5s %-5s %-5s %-5s %-5s %-5s\n", "PID",
+           "AT",
+           "BT",
+           "ST",
+           "CT",
+           "TAT",
+           "WT",
+           "RT",
+           "Priority");
     for (index = 0; index < TOTAL; index++)
-    {
-        printf("Process: %s ", processes[index].PID);
-        printf("AT: %d ", processes[index].AT);
-        printf("BT: %d ", processes[index].BT);
-        printf("ST: %d ", processes[index].ST);
-        printf("CT: %d ", processes[index].CT);
-        printf("TAT: %d ", processes[index].TAT);
-        printf("WT: %d ", processes[index].WT);
-        printf("RT: %d ", processes[index].RT);
-        printf("Priority: %d ", processes[index].priority);
-        printf("\n");
-    }
+        printf("%-5s %-5d %-5d %-5d %-5d %-5d %-5d %-5d %-5d\n", processes[index].PID,
+               processes[index].AT,
+               processes[index].BT,
+               processes[index].ST,
+               processes[index].CT,
+               processes[index].TAT,
+               processes[index].WT,
+               processes[index].RT,
+               processes[index].priority);
     printf("Average : \n");
     printf("Turn Around Time: %.2f ", avgTAT);
     printf("Waiting Time: %.2f ", avgWT);
