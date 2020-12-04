@@ -3,77 +3,62 @@
 #include <string.h>
 
 // Temp Inputs
-char **PIDtemp;
-char **ATtemp;
-char **BTtemp;
-char **Ptemp;
-int TOTAL;
+int TOTAL = 16;
+int SIZE = 99;
+char PIDtemp[16][99];
+char ATtemp[16][99];
+char BTtemp[16][99];
+char Ptemp[16][99];
 
 // Read File
 void readFile(char *filename)
 {
-    FILE *fp, *fptotal;
+    FILE *fp;
     char *mode = "r";
     fp = fopen(filename, mode);
-    fptotal = fopen(filename, mode);
 
-    if (fp == NULL || fptotal == NULL)
+    if (!fp)
     {
         printf("Cann't open file!");
         exit(-1);
     }
-    // Read Content
-    int SIZE = 1000;
-    char line[SIZE];
-
-    // Determining TOTAL
-    TOTAL = 0;
-    while (strcmp(fgets(line, sizeof(line), (FILE *)fptotal), "EOF") != 0)
-        TOTAL++;
-
-    PIDtemp = (char **)malloc(TOTAL + 1);
-    ATtemp = (char **)malloc(TOTAL + 1);
-    BTtemp = (char **)malloc(TOTAL + 1);
-    Ptemp = (char **)malloc(TOTAL + 1);
-
     // Read content from file
     char content[SIZE];
     int pos;
-    for (pos = 0; strcmp(fgets(content, sizeof(content), (FILE *)fp), "EOF") != 0; pos++)
+    printf("Inputs \n");
+    printf("    PID  AT  BT  Priority \n");
+    for (pos = 0; pos < TOTAL; pos++)
     {
+        fgets(content, sizeof(content), (FILE *)fp);
         char *token;
         token = strtok(content, ":");
-        PIDtemp[pos] = (char *)malloc(strlen(token) + 1);
+        printf("    %s", token);
         strcpy(PIDtemp[pos], token);
 
         char *args[3];
         // Spliting with delimiter of :
         int index;
-        for (index = 0; (token = strtok(NULL, ":")) != NULL; index++)
+        for (index = 0; index < 3; index++)
         {
+            token = strtok(NULL, ":");
+            printf("    %s", token);
             // Allocate Memory
             args[index] = (char *)malloc(strlen(token) + 1);
             // Copying
             strcpy(args[index], token);
         }
 
-        // Memory Allocation
-        ATtemp[pos] = (char *)malloc(strlen(args[0]) + 1);
         // Copying
         strcpy(ATtemp[pos], args[0]);
 
-        // Memory Allocation
-        BTtemp[pos] = (char *)malloc(strlen(args[1]) + 1);
         // Copying
         strcpy(BTtemp[pos], args[1]);
 
-        // Memory Allocation
-        Ptemp[pos] = (char *)malloc(strlen(args[2]) + 1);
         // Copying
         strcpy(Ptemp[pos], args[2]);
     }
+    printf("\n\n");
     // Close file
-    fclose(fptotal);
     fclose(fp);
 }
 
@@ -277,10 +262,11 @@ int maximumPriority(int limit)
     return maxIndex;
 }
 
+// Average TAT, WT, RT
+float avgTAT, avgWT, avgRT;
 void aggregate()
 {
-    // Average TAT, WT, RT
-    float avgTAT = 0, avgWT = 0, avgRT = 0;
+    avgTAT = 0, avgWT = 0, avgRT = 0;
     // Avg
     int index;
     for (index = 0; index < TOTAL; index++)
@@ -292,7 +278,11 @@ void aggregate()
     avgTAT = avgTAT / TOTAL;
     avgWT = avgWT / TOTAL;
     avgRT = avgRT / TOTAL;
+}
 
+void printTable()
+{
+    int index;
     // Table
     for (index = 0; index < TOTAL; index++)
     {
@@ -311,8 +301,8 @@ void aggregate()
     printf("Turn Around Time: %.2f ", avgTAT);
     printf("Waiting Time: %.2f ", avgWT);
     printf("Response Time: %.2f ", avgRT);
+    printf("\n");
 }
-
 // First Come First Serve
 void fcfs_npe()
 {
@@ -352,9 +342,6 @@ void fcfs_npe()
         }
         set_CT(&processes[processIndex], timeline);
     }
-
-    // Calculate Aggregate
-    aggregate();
 }
 // Shortest Job First
 void sjf_npe()
@@ -401,9 +388,6 @@ void sjf_npe()
         }
         set_CT(&processes[processIndex], timeline);
     }
-
-    // Calculate Aggregate
-    aggregate();
 }
 // Priority
 void priority_npe()
@@ -451,9 +435,6 @@ void priority_npe()
         }
         set_CT(&processes[processIndex], timeline);
     }
-
-    // Calculate Aggregate
-    aggregate();
 }
 // Round Robin
 void rr_pe()
@@ -476,7 +457,7 @@ void rr_pe()
 
     // Dequeue Process
     timeline = 0;
-    int quantam = 2;
+    int quantam = 4;
     while (1)
     {
         Process p = dequeue(readyQueue);
@@ -505,11 +486,71 @@ void rr_pe()
         if (readyQueue->front == NULL)
             break;
     }
-
-    // Calculate Aggregate
-    aggregate();
 }
 
+void compare()
+{
+    printf("Enter Algorithms you want to compare \n");
+    int chA, chB;
+    scanf("%d", &chA);
+    scanf("%d", &chB);
+
+    float avgTATA = 0, avgWTA = 0, avgRTA = 0;
+    switch (chA)
+    {
+    case 1:
+        fcfs_npe();
+        break;
+    case 2:
+        sjf_npe();
+        break;
+    case 3:
+        priority_npe();
+        break;
+    case 4:
+        rr_pe();
+        break;
+    }
+    aggregate();
+    avgTATA = avgTAT,
+    avgWTA = avgWT,
+    avgRTA = avgRT;
+
+    float avgTATB = 0, avgWTB = 0, avgRTB = 0;
+    switch (chB)
+    {
+    case 1:
+        fcfs_npe();
+        break;
+    case 2:
+        sjf_npe();
+        break;
+    case 3:
+        priority_npe();
+        break;
+    case 4:
+        rr_pe();
+        break;
+    }
+    aggregate();
+    avgTATB = avgTAT,
+    avgWTB = avgWT,
+    avgRTB = avgRT;
+
+    printf("For Choice : %d \n", chA);
+    printf("Average : \n");
+    printf("Turn Around Time: %.2f ", avgTATA);
+    printf("Waiting Time: %.2f ", avgWTA);
+    printf("Response Time: %.2f ", avgRTA);
+    printf("\n");
+
+    printf("For Choice : %d \n", chB);
+    printf("Average : \n");
+    printf("Turn Around Time: %.2f ", avgTATB);
+    printf("Waiting Time: %.2f ", avgWTB);
+    printf("Response Time: %.2f ", avgRTB);
+    printf("\n");
+}
 // Main
 int main()
 {
@@ -529,6 +570,7 @@ int main()
         printf("2. Shortest Job First \n");
         printf("3. Priority \n");
         printf("4. Round Robin \n");
+        printf("5. Compare Algorithms \n");
         printf("0. Exit \n");
         printf("Enter Your choice: \n");
 
@@ -538,20 +580,39 @@ int main()
         case 0:
             exit(0);
         case 1:
+        {
             fcfs_npe();
-            break;
+            aggregate();
+            printTable();
+        }
+        break;
         case 2:
+        {
             sjf_npe();
-            break;
+            aggregate();
+            printTable();
+        }
+        break;
         case 3:
+        {
             priority_npe();
-            break;
+            aggregate();
+            printTable();
+        }
+        break;
         case 4:
+        {
             rr_pe();
+            aggregate();
+            printTable();
+        }
+        break;
+        case 5:
+            compare();
             break;
         default:
             printf("Invalid Choice");
         }
-        printf("\n\n");
+        printf("\n");
     }
 }
